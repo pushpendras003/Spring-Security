@@ -1,6 +1,7 @@
 package com.example.controller;
 
 import java.util.ArrayList;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -35,13 +36,13 @@ public class HomeCntroller {
 		service.addUser(user);
 	}
 	@GetMapping("/user/{id}")
-	public User getUser(@PathVariable("id") int id) {
-		return service.getUser(id);
+	public Optional<User> getUser(@PathVariable("id") String id) {
+		return service.getUserById(id);
 	}
 	
 	@GetMapping("/user")
 	
-	public ArrayList<User> getAll(){
+	public Iterable<User> getAll(){
 		System.out.print("inside");
 		
 		return service.getAll();

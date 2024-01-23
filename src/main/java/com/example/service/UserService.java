@@ -1,32 +1,70 @@
 package com.example.service;
 
 import java.util.ArrayList;
+import java.util.Optional;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
 import com.example.model.User;
+import com.example.repo.UserRepositoryImpl;
 
-@Component
+import jakarta.annotation.PostConstruct;
+
+@Service
 public class UserService {
 	
-	ArrayList<User> users=new ArrayList<User>();
 	
-	public UserService() {
-		this.users.add(new User("Ram",1,"ram@email.com"));
-		this.users.add(new User("Shayam",2,"shayam@email.com"));
+	UserRepositoryImpl userRepo;
+	
+	@Autowired
+	private PasswordEncoder passwordEncoder;
+	
+	@Autowired
+	public UserService(UserRepositoryImpl userRepo) {
+		this.userRepo=userRepo;
+	}
+	@PostConstruct
+    public void initializeUsers() {
+        userRepo.save(new User("Ram", "1", passwordEncoder.encode("password"), "USER"));
+        userRepo.save(new User("Sita", "2", passwordEncoder.encode("password1"), "ADMIN"));
+    }
+
+	
+	public User addUser(User user) {
+		
+		userRepo.save(user);
+		return user;
 	}
 	
-	public User getUser(int id) {
-		return this.users.stream().filter((User)->User.getId()==id).findFirst().orElse(null);
+	public User getUserByUsername(String username) {
+		User u=userRepo.findByName(username);
+		u.setPassword(passwordEncoder.encode(u.getPasswordl()));
+		if(u==null) {
+			throw new UsernameNotFoundException("User Not Found");
+			
+		}
+		return u;
 	}
 	
-	public ArrayList<User> getAll(){
-		return this.users;
+	public Optional<User> getUserById(String id) {
+		Optional<User> u=userRepo.findById(id);
+		if(u==null) {
+			throw new UsernameNotFoundException("User Not Found");
+			
+		}
+		return u;
 	}
 	
-	public void addUser(User user) {
-		this.users.add(user);
+	public Iterable<User> getAll(){
+		return userRepo.findAll();
 	}
+	
+	
+	
+	
 
 }
